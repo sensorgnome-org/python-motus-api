@@ -9,7 +9,7 @@ Install the requirements using `pipenv install`. To develop the library, use `pi
 
 ## Tests
 
-Tests use pytest and can be run with `pytest` if development depen
+Tests use pytest and can be run with `python -m pytest` if development depen
 
 ## Usage
 
