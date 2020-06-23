@@ -24,5 +24,6 @@ The following are the currently supported endpoints:
 
 - `/api/receivers/`: Returns a list of SGReceiver objects representing all Motus receivers.
   - Called with `list_receivers()`.
-- `/api/projects/`: Returns a list of SGProject objects representint all Motus Projects.
+  - `get_receiver(receiver_serial_number)` will return a single SGProject object, or `None` instead of the whole list.
+- `/api/projects/`: Returns a list of SGProject objects representing all Motus Projects.
   - Called with `list_projects()`.

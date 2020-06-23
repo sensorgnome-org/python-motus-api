@@ -82,8 +82,12 @@ class MotusAPI:
         self._base_url = ""
         self.motus_username = ""
         self.motus_password = ""
-        self.auth = True if self.motus_password and self.motus_username else False
         self.url_max_length = 2000
+
+    @property
+    def auth(self):
+        """True if username and password both set and we should be using auth, false otherwise."""
+        return True if self.motus_password and self.motus_username else False
 
     def date(self):
         """
@@ -152,6 +156,11 @@ class MotusAPI:
                 f"Status code: {status_code} received from server unexpectedly."
             )
 
+    def __repr__(self):
+        """ Dataclass should generate a repr(), but it didn't work. """
+        fields = ", ".join([f"{k}='{v}'" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__name__}({fields})"
+
 
 class SGMotusAPI(MotusAPI):
     """Interaction with Sensorgnome specific APIs"""
@@ -171,15 +180,26 @@ class SGMotusAPI(MotusAPI):
         """Gets metadata related to all Motus receivers."""
         endpoint = "receivers"
         result = self._get(endpoint)["data"]
-        return SGReceiver(result)
+        return [SGReceiver(x) for x in result]
+
+    def get_receiver(self, receiver_serial):
+        """ Gets a single SGReceiver instance given a serial number, or none if it doesn't exist. """
+        all_receivers = self.list_receivers()
+        print("all receivers count:", len(all_receivers))
+        print("serno:", receiver_serial)
+        for receiver in all_receivers:
+            if receiver.receiver_id == receiver_serial:
+                return receiver
+        return None
 
     def list_projects(self):
+        """Gets metadata related to all Motus projects."""
         endpoint = "projects"
         result = self._get(endpoint)["data"]
-        return SGProject(result)
+        return [SGProject(x) for x in result]
 
 
-@dataclass(init=False)
+@dataclass(repr=False)
 class SGReceiver(SGMotusAPI):
     def __init__(self, recv):
         super().__init__()
@@ -187,15 +207,17 @@ class SGReceiver(SGMotusAPI):
         self.deployment_status = recv["deploymentStatus"]
         self.motus_receiver_id = int(recv["motusRecvID"])
         self.project_receiver_id = int(recv["recvProjectID"])
-        self.deployment_start = self.to_datetime(recv["dtStart"])
+        self.deployment_start = (
+            self.to_datetime(recv["dtStart"]) if recv["dtStart"] else None
+        )
         self.receiver_type = recv["receiverType"]
         self.receiver_id = recv["receiverID"]
-        self.device_id = int(recv["deviceID"])
+        self.device_id = int(recv["deviceID"]) if recv["deviceID"] else None
         self.mac_address = recv["macAddress"]
 
 
-@dataclass(init=False)
-class SGProject(SGMotusAPI):
+@dataclass(repr=False)
+class SGProject:
     def __init__(self, proj):
         super().__init__()
         print(proj)
