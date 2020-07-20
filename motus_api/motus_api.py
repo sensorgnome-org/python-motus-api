@@ -1,6 +1,6 @@
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass
 
 
@@ -94,7 +94,7 @@ class MotusAPI:
         Returns the current date in the form "YYYYMMDDhhmmss" as needed by the API.
         """
         ds = "%Y%m%d%H%M%S"
-        return datetime.strftime(datetime.utcnow(), ds)
+        return datetime.strftime(datetime.now(timezone.utc), ds)
 
     def _get(self, endpoint, request_params={}, api_key="", serial_number=""):
         """
